@@ -123,10 +123,10 @@ exports.database.prototype.init = function(callback) {
   MongoClient.connect(url, options, this._onMongoConnect.bind(this));
 }
 
-exports.database.prototype._onMongoConnect = function(error, db) {
+exports.database.prototype._onMongoConnect = function(error, client) {
   if (error) {throw 'an error occurred [' + error + '] on mongo connect'}
-
-  this.db = db;
+  this.client = client;
+  this.db = client.db(this.settings.dbname);
   this.collection = this.db.collection(this.settings.collectionName);
   this.db.ensureIndex(this.settings.collectionName, {key: 1}, {unique:true, background:true}, function(err, indexName) {
     if (err) {
@@ -183,7 +183,7 @@ exports.database.prototype._onMongoConnect = function(error, db) {
     this.collection.bulkWrite(mongoBulkOperations, callback);
   }
 
-  exports.database.prototype.close = function (callback) {this.db.close(callback)}
+  exports.database.prototype.close = function (callback) {this.client.close(callback)}
 
   this.onMongoReady(error, this);
 }
